@@ -8,7 +8,7 @@ class AuthPage extends Component {
     isLogin: true
   };
 
-static contextType = AuthContext; 
+  static contextType = AuthContext;
 
   constructor(props) {
     super(props);
@@ -33,26 +33,34 @@ static contextType = AuthContext;
 
     let requestBody = {
       query: `
-        query {
-          login(email: "${email}", password: "${password}") {
+        query Login($email: String!, $password: String!) {
+          login(email: $email, password: $password) {
             userId
             token
             tokenExpiration
           }
         }
-      `
+      `,
+      variables: {
+        email: email,
+        password: password
+      }
     };
 
     if (!this.state.isLogin) {
       requestBody = {
         query: `
-          mutation {
-            createUser(userInput: {email: "${email}", password: "${password}"}) {
+          mutation CreateUser($email: String!, $password: String!) {
+            createUser(userInput: {email: $email, password: $password}) {
               _id
               email
             }
           }
-        `
+        `,
+        variables: {
+          email: email,
+          password: password
+        }
       };
     }
 
@@ -71,11 +79,11 @@ static contextType = AuthContext;
       })
       .then(resData => {
         if (resData.data.login.token) {
-            this.context.login(
-                resData.data.login.token,
-                resData.data.login.userId,
-                resData.data.login.tokenExpiration
-            );
+          this.context.login(
+            resData.data.login.token,
+            resData.data.login.userId,
+            resData.data.login.tokenExpiration
+          );
         }
       })
       .catch(err => {
